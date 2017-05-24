@@ -2,10 +2,11 @@
 # Licensed under the LGPLv3, see LICENCE file for details.
 
 import base64
+
 try:
-    from cookielib import Cookie, CookieJar         # Python 2
+    from cookielib import Cookie, CookieJar  # Python 2
 except ImportError:
-    from http.cookiejar import Cookie, CookieJar    # Python 3  # NOQA
+    from http.cookiejar import Cookie, CookieJar  # Python 3  # NOQA
 import json
 import requests
 import utils
@@ -20,6 +21,13 @@ ERR_DISCHARGE_REQUIRED = 'macaroon discharge required'
 TIME_OUT = 30
 DEFAULT_PROTOCOL_VERSION = {'Bakery-Protocol-Version': '1'}
 MAX_DISCHARGE_RETRIES = 3
+
+BAKERY_V0 = 0
+BAKERY_V1 = 1
+BAKERY_V2 = 2
+BAKERY_V3 = 3
+LATEST_BAKERY_VERSION = BAKERY_V1
+NONCE_LEN = 24
 
 
 class DischargeException(Exception):
@@ -86,13 +94,16 @@ class _Client:
                                  data=payload,
                                  # timeout=TIME_OUT, TODO: add a time out
                                  cookies=self._jar)
-        if response.status_code == 200:
+        status_code = response.status_code
+        if status_code == 200:
             return _extract_macaroon_from_response(response)
-        elif response.status_code == 401 and \
-                response.headers.get('WWW-Authenticate', '') == 'Macaroon':
+        elif status_code == 401 and response.headers.get(
+                'WWW-Authenticate',
+                '') == 'Macaroon':
             error = response.json()
             if error.get('Code', '') != ERR_INTERACTION_REQUIRED:
-                return DischargeException('unable to get code from discharge')
+                return DischargeException(
+                    'unable to get code from discharge')
             visit_url, wait_url = _extract_urls(response)
             self._visit_page(visit_url)
             # Wait on the wait url and then get a macaroon if validated.
@@ -164,3 +175,14 @@ def _extract_urls(response):
     visit_url = response_json['Info']['VisitURL']
     wait_url = response_json['Info']['WaitURL']
     return visit_url, wait_url
+
+
+class ThirdPartyInfo:
+    def __init__(self, version, public_key):
+        '''
+        @param version: holds latest the bakery protocol version supported
+        by the discharger.
+        @param public_key: holds the public key of the third party.
+        '''
+        self.version = version
+        self.public_key = public_key
