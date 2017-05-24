@@ -2,7 +2,7 @@
 # Licensed under the LGPLv3, see LICENCE file for details.
 include sysdeps.mk
 
-PYTHON = python
+PYTHON = python3
 # Since the python-tox package in Ubuntu uses Python 3, use pip to install tox
 # instead. This also works on OSX where tox is not present in Homebrew.
 PIP_SYSDEPS = tox
