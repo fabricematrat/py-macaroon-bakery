@@ -20,18 +20,18 @@ def encode_caveat(condition, root_key, third_party_info, key, ns):
     The caveat will be encoded according to the version information
     found in thirdPartyInfo.
 
-    @param condition:
-    @param root_key:
-    @param third_party_info:
-    @param key:
-    @param ns:
-    @return:
+    @param condition: string
+    @param root_key: bytes
+    @param third_party_info: object
+    @param key: nacl key
+    @param ns: not used yet
+    @return: a base64 encoded string
     '''
     if third_party_info.version == bakery.BAKERY_V1:
         return _encode_caveat_v1(condition, root_key,
                                  third_party_info.public_key, key)
 
-    raise NotImplemented('bakery v1 support only')
+    raise NotImplementedError('only bakery v1 supported')
 
 
 def _encode_caveat_v1(condition, root_key, third_party_pub_key, key):
@@ -45,7 +45,7 @@ def _encode_caveat_v1(condition, root_key, third_party_pub_key, key):
     @param root_key:
     @param third_party_pub_key:
     @param key:
-    @return:
+    @return: a base64 encoded string
     '''
     plain_data = json.dumps(
         {'RootKey': base64.b64encode(root_key).decode('ascii'),
@@ -62,12 +62,16 @@ def _encode_caveat_v1(condition, root_key, third_party_pub_key, key):
             Base64Encoder).decode('ascii'),
         'Nonce': base64.b64encode(nonce).decode('ascii'),
         'Id': base64.b64encode(encrypted).decode('ascii')
-    })))
+    }))).decode('ascii')
 
 
 def decode_caveat(key, caveat):
-    ''' decodeCaveat attempts to decode caveat by decrypting the encrypted part
+    ''' Attempts to decode caveat by decrypting the encrypted part
     using key.
+
+    @param key: the nacl key to decode.
+    @param caveat: a base64 encoded JSON string.
+    @return: ThirdPartyCaveatInfo
     '''
     if len(caveat) == 0:
         raise ValueError('empty third party caveat')
@@ -75,16 +79,12 @@ def decode_caveat(key, caveat):
     first = caveat[0]
     if first == 'e':
         return _decode_caveat_v1(key, caveat)
-    raise NotImplemented('only bakery v1 supported')
+    raise NotImplementedError('only bakery v1 supported')
 
 
 def _decode_caveat_v1(key, caveat):
-    ''' decodeCaveatV1 attempts to decode a base64 encoded JSON id. This
+    ''' Attempts to decode a base64 encoded JSON id. This
     encoding is nominally version -1.
-
-    @param key:
-    @param caveat:
-    @return:
     '''
 
     data = base64.b64decode(caveat).decode('utf-8')
@@ -109,8 +109,8 @@ def _decode_caveat_v1(key, caveat):
     fp_key = PublicKey(base64.b64decode(wrapper.get('FirstPartyPublicKey')))
     return macaroon.ThirdPartyCaveatInfo(
         record.get('Condition'),
-        bytes(fp_key),
-        bytes(key),
+        fp_key,
+        key,
         base64.b64decode(record.get('RootKey')),
         caveat,
         bakery.BAKERY_V1)

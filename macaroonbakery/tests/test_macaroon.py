@@ -55,8 +55,8 @@ class TestMacaroon(TestCase):
         cav = codec.decode_caveat(tp_key, tp_cav[0].caveat_id)
         assert cav == macaroon.ThirdPartyCaveatInfo(
             condition="test_condition",
-            first_party_public_key=bytes(fp_key.public_key),
-            third_party_key_pair=bytes(tp_key),
+            first_party_public_key=fp_key.public_key,
+            third_party_key_pair=tp_key,
             root_key='random',
             caveat=tp_cav[0].caveat_id,
             version=bakery.BAKERY_V1
@@ -81,8 +81,8 @@ class TestMacaroon(TestCase):
         cav = codec.decode_caveat(tp_key, encrypted_cav)
         assert cav == macaroon.ThirdPartyCaveatInfo(
             condition="caveat condition",
-            first_party_public_key=bytes(fp_key.public_key),
-            third_party_key_pair=bytes(tp_key),
+            first_party_public_key=fp_key.public_key,
+            third_party_key_pair=tp_key,
             root_key='random',
             caveat=encrypted_cav,
             version=bakery.BAKERY_V1
