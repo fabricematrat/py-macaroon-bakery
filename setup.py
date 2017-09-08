@@ -24,11 +24,11 @@ with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    'requests>=2.16.5',
-    'PyNaCl>=1.1.2',
-    'pymacaroons>=0.11.0',
-    'six>=1.10.0',
-    'protobuf==3.3.0',
+    'requests==2.18.4',
+    'PyNaCl==1.1.2',
+    'pymacaroons==0.12.0',
+    'six==1.11.0',
+    'protobuf==3.4.0',
     'pyRFC3339==1.0',
     'pytz==2017.2'
 ]
