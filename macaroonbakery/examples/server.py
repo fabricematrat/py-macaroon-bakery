@@ -26,7 +26,8 @@ class GetHandler(BaseHTTPRequestHandler):
         )
         ctx = checkers.AuthContext()
         try:
-            auth_checker.allow(ctx, [macaroonbakery.LOGIN_OP])
+            auth_checker.allow(ctx, [macaroonbakery.Op(entity='get',
+                                                       action='write')])
         except macaroonbakery.DischargeRequiredError as exc:
             m = self._bakery.oven.macaroon(
                 httpbakery.request_version(self.headers),
@@ -34,18 +35,18 @@ class GetHandler(BaseHTTPRequestHandler):
                 exc.cavs(),
                 exc.ops()
             )
-            content, headers = httpbakery.get_error(m, '/', 'authz')
+            content, headers = httpbakery.discharged_required_response(
+                m, '/', 'authz')
             self.send_response(401)
             for h in headers:
                 self.send_header(h, headers[h])
             self.end_headers()
             self.wfile.write(content.encode('utf-8'))
             return
-        except ValueError as exc:
+        except macaroonbakery.PermissionDenied as exc:
             # Might be a Auth error
-            self.send_response(200)
+            self.send_response(401)
             self.end_headers()
-            self.wfile.write(exc.args[0].encode('utf-8'))
             return
         self.send_response(200)
         message = 'authenticated\n'
@@ -83,7 +84,9 @@ if __name__ == '__main__':
         checker=None,
         root_key_store=macaroonbakery.MemoryKeyStore(os.urandom(24)),
         authorizer=macaroonbakery.ACLAuthorizer(
-            get_acl=lambda x, y: ['fabricematrat'])
+            get_acl=lambda ctx, op: ['fabricezzzmatrat'],
+            allow_public=False
+        )
     )
 
     def handler(*args):
