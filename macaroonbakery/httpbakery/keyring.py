@@ -1,9 +1,6 @@
 # Copyright 2017 Canonical Ltd.
 # Licensed under the LGPLv3, see LICENCE file for details.
-
 from six.moves.urllib.parse import urlparse
-
-import nacl.public
 import requests
 
 import macaroonbakery
@@ -33,12 +30,16 @@ class ThirdPartyLocator(macaroonbakery.ThirdPartyLocator):
         info = self._cache.get(loc)
         if info is not None:
             return info
-
-        resp = requests.get(self._url + '/discharge/info')
+        url_endpoint = '/discharge/info'
+        resp = requests.get(self._url + url_endpoint)
         status_code = resp.status_code
+        if status_code == 404:
+            url_endpoint = '/publickey'
+            resp = requests.get(self._url + url_endpoint)
+            status_code = resp.status_code
         if status_code != 200:
             raise macaroonbakery.ThirdPartyInfoNotFound(
-                'unable to get info from /discharge/info')
+                'unable to get info from {}'.format(url_endpoint))
         json_resp = resp.json()
         if json_resp is None:
             raise macaroonbakery.ThirdPartyInfoNotFound(
@@ -47,13 +48,12 @@ class ThirdPartyLocator(macaroonbakery.ThirdPartyLocator):
         if pk is None:
             raise macaroonbakery.ThirdPartyInfoNotFound(
                 'no public key found in /discharge/info')
-        idm_pk = nacl.public.PublicKey(pk,
-                                       encoder=nacl.encoding.Base64Encoder)
+        idm_pk = macaroonbakery.PublicKey.deserialize(pk)
         version = json_resp.get('Version')
         if version is None:
             version = macaroonbakery.BAKERY_V1
         self._cache[loc] = macaroonbakery.ThirdPartyInfo(
             version=version,
-            public_key=macaroonbakery.PublicKey(idm_pk)
+            public_key=idm_pk
         )
         return self._cache.get(loc)

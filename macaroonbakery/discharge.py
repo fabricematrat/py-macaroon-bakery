@@ -200,7 +200,7 @@ class _EmptyLocator(macaroonbakery.ThirdPartyLocator):
 def local_third_party_caveat(key, version):
     ''' Returns a third-party caveat that, when added to a macaroon with
     add_caveat, results in a caveat with the location "local", encrypted with
-    the given public key.
+    the given PublicKey.
     This can be automatically discharged by discharge_all passing a local key.
     '''
     encoded_key = key.encode().decode('utf-8')

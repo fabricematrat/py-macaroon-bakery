@@ -19,8 +19,8 @@ from macaroonbakery.checkers.conditions import (
 from macaroonbakery.checkers.utils import condition_with_prefix
 
 
-class NamespaceError(Exception):
-    '''Raised if AuthChecker cannot be initialized properly.'''
+class RegisterError(Exception):
+    '''Raised if Checker cannot reister properly conditions.'''
     pass
 
 
@@ -106,24 +106,24 @@ class Checker(FirstPartyCaveatChecker):
         if the condition has already been registered.
         '''
         if check is None:
-            raise NamespaceError(
+            raise RegisterError(
                 'no check function registered for namespace {} when '
                 'registering condition {}'.format(uri, cond))
 
         prefix = self._namespace.resolve(uri)
         if prefix is None:
-            raise NamespaceError('no prefix registered for namespace {} when '
-                                 'registering condition {}'.format(uri, cond))
+            raise RegisterError('no prefix registered for namespace {} when '
+                                'registering condition {}'.format(uri, cond))
 
         if prefix == '' and cond.find(':') >= 0:
-            raise NamespaceError(
+            raise RegisterError(
                 'caveat condition {} in namespace {} contains a colon but its'
                 ' prefix is empty'.format(cond, uri))
 
         full_cond = condition_with_prefix(prefix, cond)
         info = self._checkers.get(full_cond)
         if info is not None:
-            raise NamespaceError(
+            raise RegisterError(
                 'checker for {} (namespace {}) already registered in '
                 'namespace {}'.format(full_cond, uri, info.ns))
         self._checkers[full_cond] = CheckerInfo(

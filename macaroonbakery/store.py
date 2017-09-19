@@ -27,7 +27,7 @@ class MemoryOpsStore:
 
 
 class RootKeyStore(object):
-    ''' Defines store for macaroon root keys.
+    ''' Defines a store for macaroon root keys.
     '''
     __metaclass__ = abc.ABCMeta
 
@@ -61,7 +61,7 @@ class MemoryKeyStore(RootKeyStore):
     used.
     '''
     def __init__(self, key=None):
-        '''
+        ''' If the key is not specified a random key will be generated.
         @param key: bytes
         '''
         if key is None:
@@ -69,7 +69,7 @@ class MemoryKeyStore(RootKeyStore):
         self._key = key
 
     def get(self, id):
-        if len(id) != 1 or id[:1] != b'0' or self._key is None:
+        if id != b'0':
             return None
         return self._key
 

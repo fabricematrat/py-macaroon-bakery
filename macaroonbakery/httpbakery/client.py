@@ -174,10 +174,8 @@ def extract_macaroons(headers):
         if not c.startswith('macaroon-'):
             continue
         data = base64.b64decode(cs[c].value)
-        data_as_dict = json.loads(data.decode('utf-8'))
-        ms = []
-        for macaroon_as_dict in data_as_dict:
-            ms.append(Macaroon.deserialize(json.dumps(macaroon_as_dict),
-                                           serializer=JsonSerializer()))
+        data_as_objs = json.loads(data.decode('utf-8'))
+        ms = [Macaroon.deserialize(json.dumps(x), serializer=JsonSerializer())
+              for x in data_as_objs]
         mss.append(ms)
     return mss

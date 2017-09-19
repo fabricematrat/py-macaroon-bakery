@@ -16,6 +16,12 @@ class PrivateKey(object):
     def public_key(self):
         return PublicKey(self._key.public_key)
 
+    @classmethod
+    def deserialize(cls, serialized):
+        return PrivateKey(
+            nacl.public.PrivateKey(serialized,
+                                   encoder=nacl.encoding.Base64Encoder))
+
     def encode(self, raw=False):
         if raw:
             return self._key.encode()
@@ -37,6 +43,12 @@ class PublicKey(object):
         if raw:
             return self._key.encode()
         return self._key.encode(nacl.encoding.Base64Encoder)
+
+    @classmethod
+    def deserialize(cls, serialized):
+        return PublicKey(
+            nacl.public.PublicKey(serialized,
+                                  encoder=nacl.encoding.Base64Encoder))
 
     def __eq__(self, other):
         return self.key == other.key

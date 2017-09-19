@@ -64,6 +64,7 @@ class Checker(object):
     def auth(self, mss):
         ''' Returns a new AuthChecker instance using the given macaroons to
         inform authorization decisions.
+        @param mss: a list of macaroon list.
         '''
         return AuthChecker(parent=self,
                            macaroons=mss)

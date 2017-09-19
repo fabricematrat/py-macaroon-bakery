@@ -47,13 +47,13 @@ def encode_caveat(condition, root_key, third_party_info, key, ns):
 def _encode_caveat_v1(condition, root_key, third_party_pub_key, key):
     '''Create a JSON-encoded third-party caveat.
 
-    The third_party_pub_key key represents the public key of the third party
+    The third_party_pub_key key represents the PublicKey of the third party
     we're encrypting the caveat for; the key is the public/private key pair of
     the party that's adding the caveat.
 
     @param condition string
     @param root_key bytes
-    @param third_party_pub_key nacl public key
+    @param third_party_pub_key (PublicKey)
     @param key nacl private key
     @return a base64 encoded bytes
     '''

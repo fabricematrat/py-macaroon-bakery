@@ -5,7 +5,7 @@ import json
 import macaroonbakery
 
 
-def get_error(macaroon, path, cookie_suffix_name):
+def discharged_required_response(macaroon, path, cookie_suffix_name):
     ''' Get response content and headers from a discharge macaroons error.
 
     @param macaroon may hold a macaroon that, when discharged, may
@@ -16,7 +16,7 @@ def get_error(macaroon, path, cookie_suffix_name):
     associated with the macaroon. The actual name used will be
     ("macaroon-" + CookieName). Clients may ignore this field -
     older clients will always use ("macaroon-" + macaroon.signature() in hex)
-    @return content and the headers to set on the response.
+    @return content(bytes) and the headers to set on the response(dict).
     '''
     content = json.dumps(
         {
@@ -34,6 +34,11 @@ def get_error(macaroon, path, cookie_suffix_name):
         'Content-Type': 'application/json'
     }
 
+# BAKERY_PROTOCOL_HEADER is the header that HTTP clients should set
+# to determine the bakery protocol version. If it is 0 or missing,
+# a discharge-required error response will be returned with HTTP status 407;
+# if it is 1, the response will have status 401 with the WWW-Authenticate
+# header set to "Macaroon".
 BAKERY_PROTOCOL_HEADER = 'Bakery-Protocol-Version'
 
 
@@ -44,7 +49,7 @@ def request_version(req_headers):
     version is used, which is OK because versions are backwardly compatible.
 
     @param req_headers: the request headers as a dict.
-    @return: protocol version as an int.
+    @return: bakery protocol version (for example macaroonbakery.BAKERY_V1)
     '''
     vs = req_headers.get(BAKERY_PROTOCOL_HEADER)
     if vs is None:
