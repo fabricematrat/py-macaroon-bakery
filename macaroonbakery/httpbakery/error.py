@@ -5,6 +5,13 @@ import json
 import macaroonbakery
 
 
+ERR_BAD_REQUEST = 'bad request'
+ERR_DISCHARGE_REQUIRED = 'macaroon discharge required'
+ERR_INTERACTION_REQUIRED = 'interaction required'
+ERR_INTERACTION_METHOD_NOT_FOUND = 'discharger does not provide an ' \
+                                   'supported interaction method'
+
+
 def discharged_required_response(macaroon, path, cookie_suffix_name):
     ''' Get response content and headers from a discharge macaroons error.
 
@@ -65,3 +72,4 @@ def request_version(req_headers):
         # latest version that we can.
         return macaroonbakery.LATEST_BAKERY_VERSION
     return x
+
